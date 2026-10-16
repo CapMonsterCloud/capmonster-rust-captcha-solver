@@ -1,0 +1,25 @@
+[package]
+name = "capmonstercloud-client"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+description = "Async Rust client for the CapMonster Cloud captcha-solving API"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/CapMonsterCloud/capmonster-rust-captcha-solver"
+homepage = "https://capmonster.cloud"
+documentation = "https://docs.rs/capmonstercloud-client"
+keywords = ["captcha", "capmonster", "recaptcha", "turnstile", "captcha-solver"]
+categories = ["api-bindings", "asynchronous"]
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+tokio = { version = "1", features = ["time"] }
+base64 = "0.22"
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+wiremock = "0.6"
