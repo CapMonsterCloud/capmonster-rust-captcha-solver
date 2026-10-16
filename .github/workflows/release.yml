@@ -1,0 +1,72 @@
+name: Release
+
+# Publishes to crates.io when `version` in Cargo.toml is a version that does not exist there yet,
+# then tags `vX.Y.Z` and creates a GitHub Release. Any other push to main is a no-op.
+# To release: bump `version` in Cargo.toml + add a `## [X.Y.Z]` section to CHANGELOG.md in a PR and merge it.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    # Optional gate: add required reviewers to the `crates-io` environment (Settings -> Environments)
+    # to approve every release by hand. The registry token lives in this environment's secrets.
+    environment: crates-io
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: v
+        run: |
+          VERSION=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].version')
+          NAME=$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].name')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Already on crates.io?
+        id: published
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -A "capmonster-rust-release-workflow" \
+            "https://crates.io/api/v1/crates/${{ steps.v.outputs.name }}/${{ steps.v.outputs.version }}")
+          echo "http $code"
+          echo "exists=$([ "$code" = 200 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Nothing to release
+        if: steps.published.outputs.exists == 'true'
+        run: echo "${{ steps.v.outputs.name }} ${{ steps.v.outputs.version }} is already published, skipping."
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.published.outputs.exists == 'false'
+      - uses: Swatinem/rust-cache@v2
+        if: steps.published.outputs.exists == 'false'
+
+      - name: Checks before publishing
+        if: steps.published.outputs.exists == 'false'
+        run: |
+          grep -q "^## \[${{ steps.v.outputs.version }}\]" CHANGELOG.md \
+            || { echo "CHANGELOG.md has no section for ${{ steps.v.outputs.version }}"; exit 1; }
+          cargo test --locked || cargo test
+
+      - name: Publish to crates.io
+        if: steps.published.outputs.exists == 'false'
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Tag and GitHub Release
+        if: steps.published.outputs.exists == 'false'
+        run: |
+          gh release create "v${{ steps.v.outputs.version }}" \
+            --target "${{ github.sha }}" \
+            --title "v${{ steps.v.outputs.version }}" \
+            --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

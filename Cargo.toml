@@ -11,6 +11,7 @@ homepage = "https://capmonster.cloud"
 documentation = "https://docs.rs/capmonstercloud-client"
 keywords = ["captcha", "capmonster", "recaptcha", "turnstile", "captcha-solver"]
 categories = ["api-bindings", "asynchronous"]
+exclude = [".github/"]
 
 [dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

@@ -173,6 +173,21 @@ One source file per type lives in [`src/requests/`](./src/requests).
 
 ---
 
+## 🏷️ Versioning & releases
+
+The crate follows [SemVer](https://semver.org/); user-visible changes are listed in [CHANGELOG.md](./CHANGELOG.md).
+While the major version is `0`:
+
+| Change | Bump |
+| :--- | :--- |
+| Bugfix, new optional field / metadata key, docs | patch (`0.1.0` → `0.1.1`) |
+| New request type, or any breaking change (renamed/removed public item, a parameter becoming required) | minor (`0.1.1` → `0.2.0`) |
+
+Release flow (automated by [`.github/workflows/release.yml`](./.github/workflows/release.yml)): in a PR bump `version` in `Cargo.toml`
+and add a `## [X.Y.Z]` section to `CHANGELOG.md`; after the merge to `main` the workflow publishes to
+[crates.io](https://crates.io/crates/capmonstercloud-client), tags `vX.Y.Z` and creates a GitHub Release. The version is also sent in the
+`User-Agent` of every request (`Zennolab.CapMonsterCloud.Client.Rust/X.Y.Z`).
+
 ## 🧩 Adding a captcha type
 
 1. `src/requests/<snake_name>.rs`: a `#[derive(Serialize)]` struct with `new()` + `with_*` setters, `impl CaptchaRequest` (`TASK_TYPE`, `CLASS` for CustomTask, `timeouts()`, optional `validate()`) and a test asserting the exact JSON. Copy `recaptcha_v2.rs` (plain task) or `altcha.rs` (CustomTask with typed metadata).
