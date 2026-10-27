@@ -1,10 +1,10 @@
-# CapMonster Cloud Rust SDK: Async AI Captcha Solver & Anti-Bot Bypass for Rust
+# CapMonster Cloud Rust SDK: Rust Captcha Solver & Captcha Bypass for reCAPTCHA, Cloudflare Turnstile and GeeTest
 
 > **🔄 Migrating from 2Captcha or Capsolver?** CapMonster Cloud is a fast, cost-effective **2captcha alternative** and **capsolver alternative** for Rust: reCAPTCHA v3 from **$0.90 per 1,000 solves**, which is **up to 38% cheaper than 2Captcha** and **10% cheaper than Capsolver**, with an API response time of **≤ 2 s**. Already have software built for 2Captcha? CapMonster Cloud [supports the 2Captcha API format](https://docs.capmonster.cloud/docs/external-services/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme). Moving your Rust code takes just a few lines: see the **Migration examples** below. Full comparison and disclaimer are in the comparison section below.
 
 <p align="center">
   <a href="https://capmonster.cloud/en/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme">
-    <img src="https://img.shields.io/badge/CapMonster%20Cloud-Rust%20Captcha%20Solver-00B2FF?style=for-the-badge&logo=rust&logoColor=white" alt="CapMonster Cloud Rust SDK - AI captcha solver for Rust" height="40">
+    <img src="https://img.shields.io/badge/CapMonster%20Cloud-Rust%20Captcha%20Solver-00B2FF?style=for-the-badge&logo=rust&logoColor=white" alt="CapMonster Cloud Rust SDK - captcha solver and captcha bypass API client" height="40">
   </a>
 </p>
 
@@ -30,16 +30,17 @@ Official asynchronous Rust SDK for [CapMonster Cloud](https://capmonster.cloud/e
 
 ---
 
-## ⚡ Key Features of the Rust Captcha Solver SDK
+## ⚡ Highlights
 
-- ⚡ **Fast Solving:** Automated AI models solve captchas in 300 ms to 6 seconds depending on the system load.
-- 🤖 **Zero Human Workers:** 100% automated machine learning pipeline with no manual latencies.
+- ⚡ **Fast solving:** AI-based recognition, on average between 1 and 30 seconds depending on the captcha type.
+- 🤖 **Zero human workers:** 100% automated machine learning pipeline with no manual latencies.
+- 🛡️ **Modern anti-bot bypass:** Full support for Cloudflare Turnstile, reCAPTCHA Enterprise, GeeTest, DataDome and Amazon WAF.
 - 🦀 **Type-Safe Requests:** required parameters are constructor arguments, closed value sets are enums, inconsistent requests are rejected locally before anything is sent.
-- 🛡️ **Modern Anti-Bot Bypass:** Full support for Cloudflare Turnstile, reCAPTCHA Enterprise, GeeTest, DataDome and Amazon WAF.
-- 💰 **Cost-Effective:** Low-cost pricing structure based on pay-as-you-go balance.
 - 🔌 **Fits Your Stack:** Use the returned token with `fantoccini`, `thirtyfour`, `chromiumoxide`, `reqwest` and other Rust scraping and browser-automation tools.
-- 📉 **Cheaper Than Alternatives:** reCAPTCHA v3 from $0.90 per 1,000 solves, versus $1.45 at 2Captcha and $1.00 at Capsolver.
-- 🔄 **Easy Migration:** replace your 2Captcha or Capsolver solver code and keep the rest of your scraper or bot unchanged.
+- 💰 **Cost-effective:** Low-cost pricing structure based on pay-as-you-go balance.
+- 📉 **Cheaper than alternatives:** reCAPTCHA v3 from $0.90 per 1,000 solves, versus $1.45 at 2Captcha and $1.00 at Capsolver.
+- 🔄 **Easy migration:** replace your 2Captcha or Capsolver solver call and keep the rest of your scraper or bot unchanged.
+- 📖 **Official docs:** request types follow the [CapMonster Cloud API documentation](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
 
 ---
 
@@ -74,7 +75,7 @@ Looking for a 2captcha alternative or a capsolver alternative for Rust web scrap
 
 ---
 
-## 📦 Installation (Cargo)
+## 📦 Installation
 
 ```toml
 [dependencies]
@@ -86,7 +87,7 @@ Minimum supported Rust version: 1.88. TLS is `rustls` (no OpenSSL needed).
 
 ---
 
-## 🚀 Quick Start & Usage Examples: Bypass Captchas in Rust
+## 🚀 Quick Start: Solve and Bypass Captchas in Rust
 
 ### 1. Solve reCAPTCHA v2 in Rust (async)
 
@@ -101,7 +102,7 @@ async fn main() -> capmonstercloud_client::Result<()> {
 
     // Build the task payload
     let request = RecaptchaV2Request::new(
-        "[https://lessons.zennolab.com/captchas/recaptcha/v2_simple.php?level=high](https://lessons.zennolab.com/captchas/recaptcha/v2_simple.php?level=high)",
+        "https://lessons.zennolab.com/captchas/recaptcha/v2_simple.php?level=high",
         "6Lcg7CMUAAAAANphynKgn9YAgA4tQ2KI_iqRyTwd",
     );
 
@@ -124,7 +125,7 @@ async fn main() -> capmonstercloud_client::Result<()> {
 
     let proxy = ProxyInfo::new(ProxyType::Http, "203.0.113.10", 8080).with_auth("login", "password");
     let request = TurnstileRequest::new(
-        "[https://target-website.com/login](https://target-website.com/login)",
+        "https://target-website.com/login",
         "0x4AAAAAAABnPIDnK2k_e-2",
         TurnstileStandard::new().with_proxy(proxy),
     );
@@ -158,6 +159,10 @@ Errors are a single `capmonstercloud_client::Error` enum (`Validation`, `Http`, 
 
 Already use 2Captcha or Capsolver in your Rust scraper or bot? If your code calls their HTTP APIs with `reqwest` or a community crate, replace only the solver part with the CapMonster Cloud SDK and keep the rest of your code unchanged: you still send the website URL and sitekey and receive the token.
 
+### Migrating from Capsolver
+
+CapMonster Cloud uses the same `createTask` / `getTaskResult` flow, so if you call the Capsolver HTTP API directly from Rust, you can switch to the CapMonster Cloud Rust SDK or follow the [API Methods Reference](https://docs.capmonster.cloud/docs/methods/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
+
 ### After: CapMonster Cloud
 
 ```rust
@@ -169,7 +174,7 @@ async fn main() -> capmonstercloud_client::Result<()> {
     let client = CapMonsterClient::new(ClientOptions::new("YOUR_CAPMONSTER_API_KEY"))?;
 
     let request = RecaptchaV2Request::new(
-        "[https://target-website.com/page-with-recaptcha](https://target-website.com/page-with-recaptcha)",
+        "https://target-website.com/page-with-recaptcha",
         "YOUR_SITE_KEY",
     );
 
@@ -188,11 +193,11 @@ Software that already speaks the 2Captcha API can work with CapMonster Cloud wit
 
 ---
 
-## 🛡️ Supported CAPTCHA Types & Anti-Bot Systems
+## 🛡️ Supported CAPTCHA Types: Bypass reCAPTCHA, Cloudflare Turnstile, GeeTest and More
 
 Use this Rust captcha solver for captcha bypass in web scraping and automation: reCAPTCHA bypass (v2, v2 Enterprise, v3), Cloudflare Turnstile solver, DataDome solver, FunCaptcha solver, Amazon WAF bypass, GeeTest solver and image-to-text recognition.
 
-All task types conform to the official [CapMonster Cloud API Documentation](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme):
+All task types follow the official [CapMonster Cloud API documentation](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme):
 
 | Protection Type | Task Request Type | Proxy |
 | :--- | :--- | :---: |
@@ -227,10 +232,10 @@ One source file per type lives in [`src/requests/`](./src/requests).
 [ Extract sitekey & website URL ]
          │
          ▼
-[ CapMonsterClient ] ──► POST createTask to [https://api.capmonster.cloud](https://api.capmonster.cloud)
+[ CapMonsterClient ] ──► POST createTask to https://api.capmonster.cloud
          │
          ▼
-[ Neural Network Processing ] ──► Poll getTaskResult (300ms - 6s)
+[ Neural Network Processing ] ──► Poll getTaskResult until the task is ready
          │
          ▼
 [ Receive Token & Autosubmit ] ──► Complete bypass
@@ -240,10 +245,20 @@ One source file per type lives in [`src/requests/`](./src/requests).
 
 ## ⚙️ Best Practices
 
-- **Token Expiration:** Most tokens (reCAPTCHA, Turnstile) remain valid for 120 seconds. Inject and submit the solution immediately after receiving the response.
-- **Proxy Usage:** For custom tasks and strict protections, use the same proxy in your scraping session and the CapMonster task payload.
-- **Balance Monitoring:** Ensure your account balance remains positive in the [Dashboard](https://dash.capmonster.cloud/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
+- **Use tokens promptly:** CAPTCHA tokens expire quickly (a reCAPTCHA v2 token is valid for 60 seconds after solving), so submit or inject the solution immediately after receiving the response.
+- **Keep session context consistent:** When a task uses a proxy, use the same proxy in your scraping or browser session and in the CapMonster task.
+- **Use the right task type:** Choose the request type that matches the target protection and follow the required parameters in the [documentation](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
+- **Monitor your balance:** Keep your account balance positive in the [Dashboard](https://dash.capmonster.cloud/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme) and handle API errors in your code.
 - **Secrets in logs:** `Debug` output of `ClientOptions` and proxies masks the API key and passwords.
+
+---
+
+## 💡 Use Cases
+
+- **Web scraping and data collection** from websites you are authorized to access, without manual captcha solving.
+- **Browser automation:** get the solution token in Rust and inject it into the page with your automation tool.
+- **Automated testing (QA)** of your own website and its captcha-protected forms.
+- **Backend services** that need a captcha solving API inside a Rust application.
 
 ---
 
@@ -258,32 +273,44 @@ Yes. For reCAPTCHA v3 it is 10% cheaper than Capsolver ($0.90 versus $1.00 per 1
 **How do I migrate from 2Captcha or Capsolver to CapMonster Cloud in Rust?**
 Add `capmonstercloud-client` to `Cargo.toml`, create a `CapMonsterClient` with your API key, build the matching request and call `client.solve_captcha(&request)`. See the migration example above. Software that already supports the 2Captcha API can also be connected through the [CapMonster Cloud guide](https://docs.capmonster.cloud/docs/external-services/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
 
+**Is there an official Rust captcha solver from CapMonster Cloud?**
+Yes. This repository is the official Rust client library for the CapMonster Cloud captcha solving service.
+
 **How do I bypass reCAPTCHA v2 in Rust?**
 Create a client, build a `RecaptchaV2Request` with the page URL and sitekey, call `client.solve_captcha(&request).await?` and read `solution["gRecaptchaResponse"]`. See the [reCAPTCHA v2 documentation](https://docs.capmonster.cloud/docs/captchas/no-captcha-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
 
 **How do I bypass Cloudflare Turnstile in Rust?**
 Use `TurnstileRequest` with `TurnstileStandard` (optionally with a proxy), as in example 2 above. According to the [Turnstile documentation](https://docs.capmonster.cloud/docs/captchas/turnstile-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme), all Turnstile subtypes are supported automatically: manual, non-interactive and invisible.
 
-**Which captcha types does the Rust SDK support?**
-See the table above and the [Supported Captchas Overview](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme). Each type has its own request struct in `src/requests/`.
+**Which captcha types does the Rust SDK solve?**
+reCAPTCHA v2/v3 (including Enterprise), Cloudflare Turnstile, GeeTest, Amazon WAF, FunCaptcha, DataDome, Imperva, TSPD, HUNT, Binance, MTCaptcha, Yidun, Prosopo, image-to-text and complex image tasks. See the supported types table above and the [Supported Captchas Overview](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
 
 **How do I get an API key?**
-[Create a CapMonster Cloud account](https://dash.capmonster.cloud/Account/SignUp?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme), then copy your API key from the Dashboard. The [Getting Started Guide](https://docs.capmonster.cloud/docs/getting-start/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme) walks through account setup and balance top-up.
-
-**How fast is captcha solving?**
-Depending on the system load, a response arrives in 300 ms to 6 seconds.
-
-**Do I need a proxy?**
-It depends on the captcha type. The table above marks proxy support as Optional or Required for each type (for example, FunCaptcha and DataDome require one).
-
-**How long is a solution token valid?**
-Most tokens (reCAPTCHA, Turnstile) remain valid for 120 seconds, so inject and submit them immediately.
+Register on CapMonster Cloud, top up your balance and copy your API key. The [Getting Started Guide](https://docs.capmonster.cloud/docs/getting-start/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme) describes each step.
 
 **Which Rust version and TLS backend are used?**
 Minimum supported Rust version is 1.88. TLS is `rustls`, so OpenSSL is not needed.
 
+**How fast are captchas solved?**
+On average between 1 and 30 seconds, depending on the captcha type. More details are in the [CapMonster Cloud FAQ](https://docs.capmonster.cloud/docs/faq/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
+
+**How long is a reCAPTCHA v2 solution valid?**
+According to the [reCAPTCHA v2 documentation](https://docs.capmonster.cloud/docs/captchas/no-captcha-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme), the returned token is valid for 60 seconds after the captcha is solved, so use it right away.
+
+**Where is the full API reference?**
+See the [API Methods Reference](https://docs.capmonster.cloud/docs/methods/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
+
+**Do I need a proxy?**
+It depends on the captcha type. The supported types table marks proxy support as Optional or Required for each type (for example, FunCaptcha and DataDome require one).
+
 **Can I use it with browser automation?**
 Yes. The SDK returns the solution token, and you inject it into the page with the tool of your choice (`fantoccini`, `thirtyfour`, `chromiumoxide`, ...).
+
+---
+
+## ⚖️ Responsible Use
+
+CapMonster Cloud is intended for legitimate business purposes only, such as testing your own website or a website you are authorized to test, and recognizing images you provide. Read more about [ethical and transparent captcha automation](https://capmonster.cloud/en/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
 
 ---
 
@@ -302,6 +329,8 @@ and add a `## [X.Y.Z]` section to `CHANGELOG.md`; after the merge to `main` the 
 [crates.io](https://crates.io/crates/capmonstercloud-client), tags `vX.Y.Z` and creates a GitHub Release. The version is also sent in the
 `User-Agent` of every request (`Zennolab.CapMonsterCloud.Client.Rust/X.Y.Z`).
 
+---
+
 ## 🧩 Adding a captcha type
 
 1. `src/requests/<snake_name>.rs`: a `#[derive(Serialize)]` struct with `new()` + `with_*` setters, `impl CaptchaRequest` (`TASK_TYPE`, `CLASS` for CustomTask, `timeouts()`, optional `validate()`) and a test asserting the exact JSON. Copy `recaptcha_v2.rs` (plain task) or `altcha.rs` (CustomTask with typed metadata).
@@ -310,18 +339,26 @@ and add a `## [X.Y.Z]` section to `CHANGELOG.md`; after the merge to `main` the 
 
 ---
 
-## ⚖️ Responsible Use
-
-CapMonster Cloud is intended for legitimate business purposes only, such as testing your own website or a website you are authorized to test, and recognizing images you provide. Read more about [ethical and transparent captcha automation](https://capmonster.cloud/en/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
-
----
-
-## 📚 Official Documentation & Links
+## 📚 Documentation & Support
 
 - 📖 [Getting Started Guide](https://docs.capmonster.cloud/docs/getting-start/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme)
 - 🎯 [Supported Captchas Overview](https://docs.capmonster.cloud/docs/captchas/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme)
-- ⚙️ [API Methods Reference](https://docs.capmonster.cloud/docs/api/methods/create-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme)
+- ⚙️ [API Methods Reference](https://docs.capmonster.cloud/docs/methods/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme)
+- ❓ [CapMonster Cloud FAQ](https://docs.capmonster.cloud/docs/faq/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme)
+- 🌐 [Browser Extension Guides](https://docs.capmonster.cloud/docs/extension/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme)
 - 💬 [Support & Community](https://capmonster.cloud/en/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme#support)
+
+## Other official SDKs & integrations
+
+- [Python](https://github.com/CapMonsterCloud/capmonster-python-captcha-solver)
+- [Node.js](https://github.com/CapMonsterCloud/capmonster-nodejs-captcha-solver)
+- [.NET](https://github.com/CapMonsterCloud/capmonster-dotnet-captcha-solver)
+- [Go](https://github.com/CapMonsterCloud/capmonster-go-captcha-solver)
+- [PHP](https://github.com/CapMonsterCloud/capmonster-php-captcha-solver)
+- [n8n](https://github.com/CapMonsterCloud/capmonster-n8n-captcha-solver)
+- [MCP server](https://github.com/CapMonsterCloud/capmonster-mcp-captcha-solver)
+- [MCP server for Patchright](https://github.com/CapMonsterCloud/capmonster-mcp-patchright-captcha-solver)
+- [API Docs](https://github.com/CapMonsterCloud/capmonster-captcha-solver-docs)
 
 ---
 
