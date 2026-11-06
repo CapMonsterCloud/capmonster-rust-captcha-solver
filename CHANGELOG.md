@@ -4,6 +4,11 @@ All notable changes to this crate are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [SemVer](https://semver.org/)
 (while the major version is 0, a breaking change bumps the **minor** number).
 
+## [0.1.2]
+
+### Added
+- Optional `min_score` (`minScore`, `0.1..=0.9`) for `RecaptchaV2EnterpriseRequest`.
+
 ## [0.1.1]
 
 ### Changed

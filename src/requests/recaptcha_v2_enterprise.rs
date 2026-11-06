@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+use super::recaptcha_v3::check_min_score;
 use super::{require_non_empty, CaptchaRequest};
 use crate::error::Result;
 use crate::proxy::ProxyInfo;
@@ -51,6 +52,9 @@ pub struct RecaptchaV2EnterpriseRequest {
     /// Cookies as `"name1=value1; name2=value2"`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cookies: Option<String>,
+    /// Minimum score of the token, `0.1..=0.9`.
+    #[serde(rename = "minScore", skip_serializing_if = "Option::is_none")]
+    pub min_score: Option<f64>,
 }
 
 impl RecaptchaV2EnterpriseRequest {
@@ -64,6 +68,7 @@ impl RecaptchaV2EnterpriseRequest {
             page_action: None,
             user_agent: None,
             cookies: None,
+            min_score: None,
         }
     }
 
@@ -101,6 +106,12 @@ impl RecaptchaV2EnterpriseRequest {
         self.cookies = Some(value.into());
         self
     }
+
+    /// Minimum score, must be in `0.1..=0.9` (checked by `validate()`).
+    pub fn with_min_score(mut self, value: f64) -> Self {
+        self.min_score = Some(value);
+        self
+    }
 }
 
 impl CaptchaRequest for RecaptchaV2EnterpriseRequest {
@@ -116,7 +127,7 @@ impl CaptchaRequest for RecaptchaV2EnterpriseRequest {
         if let Some(payload) = &self.enterprise_payload {
             require_non_empty("enterprisePayload.s", &payload.s)?;
         }
-        Ok(())
+        check_min_score(self.min_score)
     }
 }
 
@@ -146,6 +157,7 @@ mod tests {
             .with_page_action("login")
             .with_user_agent("UA")
             .with_cookies("a=b")
+            .with_min_score(0.7)
             .to_task()
             .unwrap();
         assert_eq!(
@@ -156,9 +168,42 @@ mod tests {
                 "proxyType": "http", "proxyAddress": "1.2.3.4", "proxyPort": 8080,
                 "proxyLogin": "u", "proxyPassword": "p",
                 "enterprisePayload": {"s": "SVAL"}, "apiDomain": "www.recaptcha.net",
-                "pageAction": "login", "userAgent": "UA", "cookies": "a=b"
+                "pageAction": "login", "userAgent": "UA", "cookies": "a=b",
+                "minScore": 0.7
             })
         );
+    }
+
+    #[test]
+    fn min_score_is_serialized() {
+        let task = RecaptchaV2EnterpriseRequest::new("https://example.com", "KEY")
+            .with_min_score(0.7)
+            .to_task()
+            .unwrap();
+        assert_eq!(
+            task,
+            json!({
+                "type": "RecaptchaV2EnterpriseTask", "websiteURL": "https://example.com",
+                "websiteKey": "KEY", "minScore": 0.7
+            })
+        );
+    }
+
+    #[test]
+    fn min_score_bounds() {
+        for bad in [0.0, 0.05, 0.95, 1.0, f64::NAN] {
+            let err = RecaptchaV2EnterpriseRequest::new("u", "k")
+                .with_min_score(bad)
+                .to_task()
+                .unwrap_err();
+            assert!(matches!(err, crate::error::Error::Validation(_)), "{bad}");
+        }
+        for ok in [0.1, 0.5, 0.9] {
+            assert!(RecaptchaV2EnterpriseRequest::new("u", "k")
+                .with_min_score(ok)
+                .to_task()
+                .is_ok());
+        }
     }
 
     #[test]
