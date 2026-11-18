@@ -214,6 +214,8 @@ All task types follow the official [CapMonster Cloud API documentation](https://
 | **TSPD** | `TspdCustomTaskRequest` | 🌐 Required |
 | **HUNT** | `HuntCustomTaskRequest` | 🌐 Required |
 | **Basilisk / TenDI / Alibaba / Friendly Captcha / Altcha** | `BasiliskCustomTaskRequest`, `TenDiCustomTaskRequest`, `AlibabaCustomTaskRequest`, `FriendlyCustomTaskRequest`, `AltchaCustomTaskRequest` | Optional |
+| **Proton Captcha** | `ProtonRequest` | 🌐 Required |
+| **FengkongCloud / ARCaptcha / HeyTap** | `FengkongCloudRequest`, `ArCaptchaRequest`, `HeyTapRequest` | — |
 | **Binance CAPTCHA** | `BinanceTaskRequest` | Optional |
 | **MTCaptcha / Yidun / Prosopo** | `MtCaptchaRequest`, `YidunRequest`, `ProsopoTaskRequest` | Optional |
 | **Standard Text CAPTCHA** | `ImageToTextRequest` (+ `TextModule`) | — |

@@ -4,6 +4,14 @@ All notable changes to this crate are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [SemVer](https://semver.org/)
 (while the major version is 0, a breaking change bumps the **minor** number).
 
+## [0.2.0]
+
+### Added
+- `FengkongCloudRequest` (`CustomTask`, class `fengkongcloud`).
+- `ArCaptchaRequest` (`ArCaptchaTask`).
+- `HeyTapRequest` (`CustomTask`, class `heytap`).
+- `ProtonRequest` (`CustomTask`, class `proton`, proxy required).
+
 ## [0.1.2]
 
 ### Added
