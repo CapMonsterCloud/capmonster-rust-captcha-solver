@@ -273,6 +273,36 @@ One source file per type lives in [`src/requests/`](./src/requests).
 
 ---
 
+## 🐞 Error Handling
+
+All failures surface as the single `capmonstercloud_client::Error` enum (`capmonstercloud_client::Result<T>` is the matching `Result` alias):
+
+| Variant | Meaning |
+| :--- | :--- |
+| `CreateTask { code, description }` | `createTask` was rejected by the API (e.g. `code = "ERROR_ZERO_BALANCE"`). |
+| `GetResult { code, description }` | `getTaskResult` returned an API error while polling. |
+| `GetBalance { code, description }` | `getBalance` was rejected by the API. |
+| `Timeout(Duration)` | The captcha type's maximum waiting time passed before a solution arrived. |
+| `Validation(String)` | The request failed validation. |
+| `Status { method, status }` | The API answered with an unexpected HTTP status. |
+| `Http(...)`, `Json(...)` | Transport (`reqwest`) or JSON (`serde_json`) errors. |
+| `MalformedResponse(String)` | The API response could not be interpreted. |
+| `UnsupportedProxyType(String)` | A `ClientProxy` with an unsupported proxy type. |
+
+```rust
+match client.solve_captcha(&request).await {
+    Ok(solution) => println!("Token: {}", solution["gRecaptchaResponse"]),
+    Err(capmonstercloud_client::Error::Timeout(waited)) => {
+        eprintln!("no solution within {waited:?}");
+    }
+    Err(e) => eprintln!("solve failed: {e}"),
+}
+```
+
+**Polling and timeouts.** The client polls `getTaskResult` automatically. Each request type provides its own schedule as `GetResultTimeouts` (`first_request_delay`, `first_request_no_cache_delay`, `requests_interval`, `timeout`); replace it with `.with_timeouts_override(GetResultTimeouts::new(1.0, 10.0, 3.0, 240.0))`. To cancel a running solve early, drop the returned future or wrap the call in `tokio::time::timeout`. Unsolved tasks are not charged.
+
+---
+
 ## ⚙️ Best Practices
 
 - **Use tokens promptly:** CAPTCHA tokens expire quickly (a reCAPTCHA v2 token is valid for 60 seconds after solving), so submit or inject the solution immediately after receiving the response.
