@@ -205,9 +205,9 @@ All task types follow the official [CapMonster Cloud API documentation](https://
 | :--- | :--- | :---: |
 | **Cloudflare Turnstile / Challenge / Waiting Room** | `TurnstileRequest` (`TurnstileStandard`, `TurnstileChallengeToken`, `TurnstileChallengeCookie`, `TurnstileWaitRoom`) | Optional / Required for cookie modes |
 | **reCAPTCHA v2** | `RecaptchaV2Request` | Optional |
-| **reCAPTCHA v2 Enterprise** | `RecaptchaV2EnterpriseRequest` | Optional |
-| **reCAPTCHA v3** | `RecaptchaV3ProxylessRequest` | — |
-| **reCAPTCHA v3 Enterprise** | `RecaptchaV3EnterpriseRequest` | — |
+| **reCAPTCHA v2 Enterprise** | `RecaptchaV2EnterpriseRequest` (optional `min_score` 0.1–0.9, builder `with_min_score`) | Optional |
+| **reCAPTCHA v3** | `RecaptchaV3ProxylessRequest` (optional `min_score` 0.1–0.9) | — |
+| **reCAPTCHA v3 Enterprise** | `RecaptchaV3EnterpriseRequest` (optional `min_score` 0.1–0.9) | — |
 | **GeeTest (v3, v4)** | `GeetestRequest` (`GeetestVersion::V3` / `V4`) | Optional |
 | **Amazon WAF** | `AmazonWafRequest` (`AmazonVisibleCaptcha`, `AmazonChallengeAndCaptcha`, `AmazonChallengeOnly`) | Optional |
 | **FunCaptcha (Arkose Labs)** | `FuncaptchaRequest` | 🌐 Required |
