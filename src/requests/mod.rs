@@ -17,18 +17,22 @@ use crate::timeouts::GetResultTimeouts;
 mod alibaba;
 mod altcha;
 mod amazon_waf;
+mod arcaptcha;
 mod basilisk;
 mod binance;
 mod complex_image;
 mod datadome;
+mod fengkongcloud;
 mod friendly;
 mod funcaptcha;
 mod geetest;
+mod heytap;
 mod hunt;
 mod image_to_text;
 mod imperva;
 mod mt_captcha;
 mod prosopo;
+mod proton;
 mod recaptcha_complex_image;
 mod recaptcha_v2;
 mod recaptcha_v2_enterprise;
@@ -46,17 +50,21 @@ pub use amazon_waf::{
     AmazonChallengeAndCaptcha, AmazonChallengeOnly, AmazonVisibleCaptcha, AmazonWafRequest,
     AmazonWafVariant,
 };
+pub use arcaptcha::ArCaptchaRequest;
 pub use basilisk::BasiliskCustomTaskRequest;
 pub use binance::BinanceTaskRequest;
 pub use datadome::{DataDomeCustomTaskRequest, DataDomeMetadata, DataDomeVersion};
+pub use fengkongcloud::{FengkongCloudMetadata, FengkongCloudRequest};
 pub use friendly::{FriendlyCustomTaskRequest, FriendlyMetadata};
 pub use funcaptcha::FuncaptchaRequest;
 pub use geetest::{GeetestRequest, GeetestVersion};
+pub use heytap::{HeyTapMetadata, HeyTapRequest};
 pub use hunt::{HuntCustomTaskRequest, HuntMetadata, HuntMode};
 pub use image_to_text::{ImageToTextRequest, TextModule};
 pub use imperva::{ImpervaCustomTaskRequest, ImpervaMetadata};
 pub use mt_captcha::MtCaptchaRequest;
 pub use prosopo::ProsopoTaskRequest;
+pub use proton::{ProtonMetadata, ProtonRequest};
 pub use recaptcha_complex_image::{
     RecaptchaComplexImageTaskRequest, RecaptchaGrid, RecaptchaMetadata,
 };
