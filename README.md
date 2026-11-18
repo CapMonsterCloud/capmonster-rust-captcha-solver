@@ -157,6 +157,32 @@ Errors are a single `capmonstercloud_client::Error` enum (`Validation`, `Http`, 
 
 ---
 
+## 🔧 Client Configuration
+
+`ClientOptions` can be tuned with builder methods before passing it to `CapMonsterClient::new`:
+
+| Method | Default | Description |
+| :--- | :--- | :--- |
+| `ClientOptions::new(api_key)` | — | **Required.** Your CapMonster Cloud API key from the [Dashboard](https://dash.capmonster.cloud/Account/SignUp?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme). |
+| `.with_service_url(url)` | `https://api.capmonster.cloud` | CapMonster Cloud API endpoint. |
+| `.with_soft_id(id)` | `152` (`DEFAULT_SOFT_ID`) | `softId` sent with every created task; identifies your software in the Dashboard. |
+| `.with_client_timeout(duration)` | 20 seconds | Timeout of one HTTP request to the API (not of the whole solving). |
+| `.with_client_proxy(client_proxy)` | none | `ClientProxy` — proxy for the connection to the CapMonster Cloud API itself (`ProxyType`: `Http`, `Https`, `Socks4`, `Socks5`; optional `.with_auth(login, password)`). To route a solved task through a proxy, set `ProxyInfo` on the request instead. |
+| `.with_timeouts_override(timeouts)` | per-captcha-type | Replaces the polling schedule of `solve_captcha` (see Error Handling). |
+
+```rust
+use capmonstercloud_client::{CapMonsterClient, ClientOptions};
+use std::time::Duration;
+
+let client = CapMonsterClient::new(
+    ClientOptions::new("YOUR_CAPMONSTER_API_KEY")
+        .with_soft_id(12345)
+        .with_client_timeout(Duration::from_secs(30)),
+)?;
+```
+
+---
+
 ## 🔄 Migrating from 2Captcha or Capsolver
 
 Already use 2Captcha or Capsolver in your Rust scraper or bot? If your code calls their HTTP APIs with `reqwest` or a community crate, replace only the solver part with the CapMonster Cloud SDK and keep the rest of your code unchanged: you still send the website URL and sitekey and receive the token.
