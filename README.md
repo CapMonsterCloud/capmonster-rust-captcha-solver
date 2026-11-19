@@ -291,7 +291,7 @@ All failures surface as the single `capmonstercloud_client::Error` enum (`capmon
 
 ```rust
 match client.solve_captcha(&request).await {
-    Ok(solution) => println!("Token: {}", solution["gRecaptchaResponse"]),
+    Ok(solved) => println!("Token: {}", solved.solution["gRecaptchaResponse"]),
     Err(capmonstercloud_client::Error::Timeout(waited)) => {
         eprintln!("no solution within {waited:?}");
     }
@@ -299,7 +299,7 @@ match client.solve_captcha(&request).await {
 }
 ```
 
-**Polling and timeouts.** The client polls `getTaskResult` automatically. Each request type provides its own schedule as `GetResultTimeouts` (`first_request_delay`, `first_request_no_cache_delay`, `requests_interval`, `timeout`); replace it with `.with_timeouts_override(GetResultTimeouts::new(1.0, 10.0, 3.0, 240.0))`. To cancel a running solve early, drop the returned future or wrap the call in `tokio::time::timeout`. Unsolved tasks are not charged.
+**Polling and timeouts.** The client polls `getTaskResult` automatically. Each request type provides its own schedule as `GetResultTimeouts` (`first_request_delay`, `first_request_no_cache_delay`, `requests_interval`, `timeout`); replace it with `.with_timeouts_override(GetResultTimeouts::new(1.0, 10.0, 3.0, 240.0))`. To cancel a running solve early, drop the returned future or wrap the call in `tokio::time::timeout`. `SolvedTask` also carries `cost: Option<f64>` — the price of the solution in USD (`None` if the API did not return it). Unsolved tasks are not charged.
 
 ---
 
