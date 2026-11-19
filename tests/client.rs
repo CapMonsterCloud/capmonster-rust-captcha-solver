@@ -3,7 +3,8 @@ use std::time::Duration;
 
 use capmonstercloud_client::requests::RecaptchaV2Request;
 use capmonstercloud_client::{
-    CapMonsterClient, ClientOptions, ClientProxy, Error, GetResultTimeouts, ProxyType, TaskStatus,
+    CapMonsterClient, ClientOptions, ClientProxy, Error, GetResultTimeouts, ProxyType,
+    SolvedTask, TaskStatus,
 };
 use serde_json::json;
 use wiremock::matchers::{body_partial_json, header_exists, method, path};
@@ -61,11 +62,12 @@ async fn solve_captcha_creates_task_and_polls_until_ready() {
         .mount(&server)
         .await;
 
-    let solution = fast_client(&server)
+    let solved = fast_client(&server)
         .solve_captcha(&request())
         .await
         .unwrap();
-    assert_eq!(solution["gRecaptchaResponse"], "TOKEN");
+    assert_eq!(solved.solution["gRecaptchaResponse"], "TOKEN");
+    assert_eq!(solved.cost, None);
 }
 
 #[tokio::test]
@@ -164,6 +166,73 @@ async fn get_balance_returns_number() {
         .await;
 
     assert_eq!(fast_client(&server).get_balance().await.unwrap(), 12.5);
+}
+
+#[tokio::test]
+async fn get_task_result_ready_returns_cost() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/getTaskResult"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "errorId": 0, "status": "ready", "cost": 0.0003,
+            "solution": {"gRecaptchaResponse": "TOKEN"}
+        })))
+        .mount(&server)
+        .await;
+
+    let status = fast_client(&server).get_task_result(7).await.unwrap();
+    assert_eq!(
+        status,
+        TaskStatus::Ready(SolvedTask {
+            solution: json!({"gRecaptchaResponse": "TOKEN"}),
+            cost: Some(0.0003),
+        })
+    );
+}
+
+#[tokio::test]
+async fn get_task_result_ready_without_cost_has_none() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/getTaskResult"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "errorId": 0, "status": "ready", "solution": {"text": "abc"}
+        })))
+        .mount(&server)
+        .await;
+
+    let status = fast_client(&server).get_task_result(7).await.unwrap();
+    assert_eq!(
+        status,
+        TaskStatus::Ready(SolvedTask {
+            solution: json!({"text": "abc"}),
+            cost: None,
+        })
+    );
+}
+
+#[tokio::test]
+async fn solve_captcha_returns_cost() {
+    let server = MockServer::start().await;
+    Mock::given(method("POST"))
+        .and(path("/createTask"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({"errorId": 0, "taskId": 5})))
+        .mount(&server)
+        .await;
+    Mock::given(method("POST"))
+        .and(path("/getTaskResult"))
+        .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+            "errorId": 0, "status": "ready", "cost": 0.0003,
+            "solution": {"gRecaptchaResponse": "TOKEN"}
+        })))
+        .mount(&server)
+        .await;
+
+    let solved = fast_client(&server)
+        .solve_captcha(&request())
+        .await
+        .unwrap();
+    assert_eq!(solved.cost, Some(0.0003));
 }
 
 #[tokio::test]

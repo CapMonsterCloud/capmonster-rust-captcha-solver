@@ -10,8 +10,8 @@
 //!     "https://lessons.zennolab.com/captchas/recaptcha/v2_simple.php?level=high",
 //!     "6Lcg7CMUAAAAANphynKgn9YAgA4tQ2KI_iqRyTwd",
 //! );
-//! let solution = client.solve_captcha(&request).await?;
-//! println!("{}", solution["gRecaptchaResponse"]);
+//! let solved = client.solve_captcha(&request).await?;
+//! println!("{}", solved.solution["gRecaptchaResponse"]);
 //! # Ok(()) }
 //! ```
 
@@ -22,7 +22,8 @@ pub mod requests;
 mod timeouts;
 
 pub use client::{
-    CapMonsterClient, ClientOptions, TaskStatus, DEFAULT_SERVICE_URL, DEFAULT_SOFT_ID,
+    CapMonsterClient, ClientOptions, SolvedTask, TaskStatus, DEFAULT_SERVICE_URL,
+    DEFAULT_SOFT_ID,
 };
 pub use error::{Error, Result};
 pub use proxy::{ClientProxy, ProxyInfo, ProxyType};
