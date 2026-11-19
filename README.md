@@ -106,9 +106,11 @@ async fn main() -> capmonstercloud_client::Result<()> {
         "6Lcg7CMUAAAAANphynKgn9YAgA4tQ2KI_iqRyTwd",
     );
 
-    // Send task and receive token (the `solution` object as serde_json::Value)
-    let solution = client.solve_captcha(&request).await?;
-    println!("reCAPTCHA Token: {}", solution["gRecaptchaResponse"]);
+    // Send task and receive token (`solved.solution` is the solution object as serde_json::Value)
+    let solved = client.solve_captcha(&request).await?;
+    println!("reCAPTCHA Token: {}", solved.solution["gRecaptchaResponse"]);
+    // Solution cost in USD (None if the API did not return it)
+    println!("Cost: {:?}", solved.cost);
     Ok(())
 }
 ```
@@ -130,9 +132,9 @@ async fn main() -> capmonstercloud_client::Result<()> {
         TurnstileStandard::new().with_proxy(proxy),
     );
 
-    let solution = client.solve_captcha(&request).await?;
-    // inject solution["token"] into the cf-turnstile-response field of your browser session and submit
-    println!("Turnstile token: {}", solution["token"]);
+    let solved = client.solve_captcha(&request).await?;
+    // inject solved.solution["token"] into the cf-turnstile-response field of your browser session and submit
+    println!("Turnstile token: {}", solved.solution["token"]);
     Ok(())
 }
 ```
@@ -146,7 +148,7 @@ println!("balance: {}", client.get_balance().await?);
 let task_id = client.create_task(&request).await?;
 match client.get_task_result(task_id).await? {
     TaskStatus::Processing => println!("not ready yet"),
-    TaskStatus::Ready(solution) => println!("{solution}"),
+    TaskStatus::Ready(solved) => println!("{} (cost: {:?})", solved.solution, solved.cost),
 }
 ```
 
@@ -178,8 +180,8 @@ async fn main() -> capmonstercloud_client::Result<()> {
         "YOUR_SITE_KEY",
     );
 
-    let solution = client.solve_captcha(&request).await?;
-    let token = solution["gRecaptchaResponse"].as_str().unwrap_or_default();
+    let solved = client.solve_captcha(&request).await?;
+    let token = solved.solution["gRecaptchaResponse"].as_str().unwrap_or_default();
     println!("{token}");
     Ok(())
 }
@@ -279,7 +281,7 @@ Add `capmonstercloud-client` to `Cargo.toml`, create a `CapMonsterClient` with y
 Yes. This repository is the official Rust client library for the CapMonster Cloud captcha solving service.
 
 **How do I bypass reCAPTCHA v2 in Rust?**
-Create a client, build a `RecaptchaV2Request` with the page URL and sitekey, call `client.solve_captcha(&request).await?` and read `solution["gRecaptchaResponse"]`. See the [reCAPTCHA v2 documentation](https://docs.capmonster.cloud/docs/captchas/no-captcha-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
+Create a client, build a `RecaptchaV2Request` with the page URL and sitekey, call `client.solve_captcha(&request).await?` and read `solved.solution["gRecaptchaResponse"]`. See the [reCAPTCHA v2 documentation](https://docs.capmonster.cloud/docs/captchas/no-captcha-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme).
 
 **How do I bypass Cloudflare Turnstile in Rust?**
 Use `TurnstileRequest` with `TurnstileStandard` (optionally with a proxy), as in example 2 above. According to the [Turnstile documentation](https://docs.capmonster.cloud/docs/captchas/turnstile-task/?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme), all Turnstile subtypes are supported automatically: manual, non-interactive and invisible.

@@ -4,6 +4,14 @@ All notable changes to this crate are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [SemVer](https://semver.org/)
 (while the major version is 0, a breaking change bumps the **minor** number).
 
+## [0.3.0]
+
+### Added
+- `SolvedTask` (`solution` and optional `cost` in USD from `getTaskResult`).
+
+### Changed
+- `TaskStatus::Ready` now carries a `SolvedTask`, and `solve_captcha` returns `SolvedTask` instead of the bare solution `Value`.
+
 ## [0.2.0]
 
 ### Added

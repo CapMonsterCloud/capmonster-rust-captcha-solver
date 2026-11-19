@@ -15,6 +15,6 @@ async fn main() -> capmonstercloud_client::Result<()> {
     println!("balance: {}", client.get_balance().await?);
 
     let request = ImageToTextRequest::new(image).with_module_name(TextModule::Universal);
-    println!("{}", client.solve_captcha(&request).await?);
+    println!("{}", client.solve_captcha(&request).await?.solution);
     Ok(())
 }

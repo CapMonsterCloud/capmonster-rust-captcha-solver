@@ -94,6 +94,7 @@ struct ApiResponse {
     status: Option<String>,
     solution: Option<Value>,
     balance: Option<f64>,
+    cost: Option<f64>,
 }
 
 impl ApiResponse {
@@ -105,12 +106,21 @@ impl ApiResponse {
     }
 }
 
+/// A solved task: the `solution` object and the solving cost.
+#[derive(Debug, Clone, PartialEq)]
+pub struct SolvedTask {
+    /// The solution object; its shape depends on the captcha type.
+    pub solution: Value,
+    /// Solution cost in US dollars (`cost` of `getTaskResult`); `None` if the API did not return it.
+    pub cost: Option<f64>,
+}
+
 /// State of a task returned by [`CapMonsterClient::get_task_result`].
 #[derive(Debug, Clone, PartialEq)]
 pub enum TaskStatus {
     Processing,
-    /// The solution object; its shape depends on the captcha type.
-    Ready(Value),
+    /// The solution and its cost.
+    Ready(SolvedTask),
 }
 
 /// Asynchronous CapMonster Cloud client. Cheap to clone (the HTTP pool is shared).
@@ -203,15 +213,19 @@ impl CapMonsterClient {
             });
         }
         match resp.status.as_deref() {
-            Some("ready") => Ok(TaskStatus::Ready(resp.solution.unwrap_or(Value::Null))),
+            Some("ready") => Ok(TaskStatus::Ready(SolvedTask {
+                solution: resp.solution.unwrap_or(Value::Null),
+                cost: resp.cost,
+            })),
             _ => Ok(TaskStatus::Processing),
         }
     }
 
-    /// Creates a task, polls until it is solved and returns the `solution` object.
+    /// Creates a task, polls until it is solved and returns the `solution` object
+    /// together with the cost.
     ///
     /// Returns `Error::Timeout` if the captcha type's maximum waiting time is exceeded.
-    pub async fn solve_captcha<R: CaptchaRequest>(&self, request: &R) -> Result<Value> {
+    pub async fn solve_captcha<R: CaptchaRequest>(&self, request: &R) -> Result<SolvedTask> {
         let timeouts = self
             .options
             .timeouts_override
@@ -225,8 +239,8 @@ impl CapMonsterClient {
             .unwrap_or_else(|| now + Duration::from_secs(365 * 24 * 3600));
         sleep(timeouts.first_request_delay).await;
         while Instant::now() < deadline {
-            if let TaskStatus::Ready(solution) = self.get_task_result(task_id).await? {
-                return Ok(solution);
+            if let TaskStatus::Ready(solved) = self.get_task_result(task_id).await? {
+                return Ok(solved);
             }
             sleep(timeouts.requests_interval).await;
         }
