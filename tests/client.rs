@@ -3,8 +3,8 @@ use std::time::Duration;
 
 use capmonstercloud_client::requests::RecaptchaV2Request;
 use capmonstercloud_client::{
-    CapMonsterClient, ClientOptions, ClientProxy, Error, GetResultTimeouts, ProxyType,
-    SolvedTask, TaskStatus,
+    CapMonsterClient, ClientOptions, ClientProxy, Error, GetResultTimeouts, ProxyType, SolvedTask,
+    TaskStatus,
 };
 use serde_json::json;
 use wiremock::matchers::{body_partial_json, header_exists, method, path};

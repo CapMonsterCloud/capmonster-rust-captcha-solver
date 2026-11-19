@@ -22,8 +22,7 @@ pub mod requests;
 mod timeouts;
 
 pub use client::{
-    CapMonsterClient, ClientOptions, SolvedTask, TaskStatus, DEFAULT_SERVICE_URL,
-    DEFAULT_SOFT_ID,
+    CapMonsterClient, ClientOptions, SolvedTask, TaskStatus, DEFAULT_SERVICE_URL, DEFAULT_SOFT_ID,
 };
 pub use error::{Error, Result};
 pub use proxy::{ClientProxy, ProxyInfo, ProxyType};
