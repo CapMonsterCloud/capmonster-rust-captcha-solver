@@ -157,6 +157,32 @@ Errors are a single `capmonstercloud_client::Error` enum (`Validation`, `Http`, 
 
 ---
 
+## 🔧 Client Configuration
+
+`ClientOptions` can be tuned with builder methods before passing it to `CapMonsterClient::new`:
+
+| Method | Default | Description |
+| :--- | :--- | :--- |
+| `ClientOptions::new(api_key)` | — | **Required.** Your CapMonster Cloud API key from the [Dashboard](https://dash.capmonster.cloud/Account/SignUp?utm_source=github&utm_medium=referral&utm_campaign=rust_repo_readme). |
+| `.with_service_url(url)` | `https://api.capmonster.cloud` | CapMonster Cloud API endpoint. |
+| `.with_soft_id(id)` | `152` (`DEFAULT_SOFT_ID`) | `softId` sent with every created task; identifies your software in the Dashboard. |
+| `.with_client_timeout(duration)` | 20 seconds | Timeout of one HTTP request to the API (not of the whole solving). |
+| `.with_client_proxy(client_proxy)` | none | `ClientProxy` — proxy for the connection to the CapMonster Cloud API itself (`ProxyType`: `Http`, `Https`, `Socks4`, `Socks5`; optional `.with_auth(login, password)`). To route a solved task through a proxy, set `ProxyInfo` on the request instead. |
+| `.with_timeouts_override(timeouts)` | per-captcha-type | Replaces the polling schedule of `solve_captcha` (see Error Handling). |
+
+```rust
+use capmonstercloud_client::{CapMonsterClient, ClientOptions};
+use std::time::Duration;
+
+let client = CapMonsterClient::new(
+    ClientOptions::new("YOUR_CAPMONSTER_API_KEY")
+        .with_soft_id(12345)
+        .with_client_timeout(Duration::from_secs(30)),
+)?;
+```
+
+---
+
 ## 🔄 Migrating from 2Captcha or Capsolver
 
 Already use 2Captcha or Capsolver in your Rust scraper or bot? If your code calls their HTTP APIs with `reqwest` or a community crate, replace only the solver part with the CapMonster Cloud SDK and keep the rest of your code unchanged: you still send the website URL and sitekey and receive the token.
@@ -205,9 +231,9 @@ All task types follow the official [CapMonster Cloud API documentation](https://
 | :--- | :--- | :---: |
 | **Cloudflare Turnstile / Challenge / Waiting Room** | `TurnstileRequest` (`TurnstileStandard`, `TurnstileChallengeToken`, `TurnstileChallengeCookie`, `TurnstileWaitRoom`) | Optional / Required for cookie modes |
 | **reCAPTCHA v2** | `RecaptchaV2Request` | Optional |
-| **reCAPTCHA v2 Enterprise** | `RecaptchaV2EnterpriseRequest` | Optional |
-| **reCAPTCHA v3** | `RecaptchaV3ProxylessRequest` | — |
-| **reCAPTCHA v3 Enterprise** | `RecaptchaV3EnterpriseRequest` | — |
+| **reCAPTCHA v2 Enterprise** | `RecaptchaV2EnterpriseRequest` (optional `min_score` 0.1–0.9, builder `with_min_score`) | Optional |
+| **reCAPTCHA v3** | `RecaptchaV3ProxylessRequest` (optional `min_score` 0.1–0.9) | — |
+| **reCAPTCHA v3 Enterprise** | `RecaptchaV3EnterpriseRequest` (optional `min_score` 0.1–0.9) | — |
 | **GeeTest (v3, v4)** | `GeetestRequest` (`GeetestVersion::V3` / `V4`) | Optional |
 | **Amazon WAF** | `AmazonWafRequest` (`AmazonVisibleCaptcha`, `AmazonChallengeAndCaptcha`, `AmazonChallengeOnly`) | Optional |
 | **FunCaptcha (Arkose Labs)** | `FuncaptchaRequest` | 🌐 Required |
@@ -244,6 +270,36 @@ One source file per type lives in [`src/requests/`](./src/requests).
          ▼
 [ Receive Token & Autosubmit ] ──► Complete bypass
 ```
+
+---
+
+## 🐞 Error Handling
+
+All failures surface as the single `capmonstercloud_client::Error` enum (`capmonstercloud_client::Result<T>` is the matching `Result` alias):
+
+| Variant | Meaning |
+| :--- | :--- |
+| `CreateTask { code, description }` | `createTask` was rejected by the API (e.g. `code = "ERROR_ZERO_BALANCE"`). |
+| `GetResult { code, description }` | `getTaskResult` returned an API error while polling. |
+| `GetBalance { code, description }` | `getBalance` was rejected by the API. |
+| `Timeout(Duration)` | The captcha type's maximum waiting time passed before a solution arrived. |
+| `Validation(String)` | The request failed validation. |
+| `Status { method, status }` | The API answered with an unexpected HTTP status. |
+| `Http(...)`, `Json(...)` | Transport (`reqwest`) or JSON (`serde_json`) errors. |
+| `MalformedResponse(String)` | The API response could not be interpreted. |
+| `UnsupportedProxyType(String)` | A `ClientProxy` with an unsupported proxy type. |
+
+```rust
+match client.solve_captcha(&request).await {
+    Ok(solved) => println!("Token: {}", solved.solution["gRecaptchaResponse"]),
+    Err(capmonstercloud_client::Error::Timeout(waited)) => {
+        eprintln!("no solution within {waited:?}");
+    }
+    Err(e) => eprintln!("solve failed: {e}"),
+}
+```
+
+**Polling and timeouts.** The client polls `getTaskResult` automatically. Each request type provides its own schedule as `GetResultTimeouts` (`first_request_delay`, `first_request_no_cache_delay`, `requests_interval`, `timeout`); replace it with `.with_timeouts_override(GetResultTimeouts::new(1.0, 10.0, 3.0, 240.0))`. To cancel a running solve early, drop the returned future or wrap the call in `tokio::time::timeout`. `SolvedTask` also carries `cost: Option<f64>` — the price of the solution in USD (`None` if the API did not return it). Unsolved tasks are not charged.
 
 ---
 
