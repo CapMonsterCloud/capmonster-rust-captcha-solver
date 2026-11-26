@@ -1,15 +1,15 @@
 [package]
 name = "capmonstercloud-client"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 rust-version = "1.88"
-description = "Async Rust client for the CapMonster Cloud captcha-solving API"
+description = "Official CapMonster Cloud async Rust SDK: captcha solver & captcha bypass for reCAPTCHA v2/v3/Enterprise, Cloudflare Turnstile, DataDome, GeeTest, Amazon WAF, FunCaptcha and 20+ captcha types. A 2captcha and capsolver alternative"
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/CapMonsterCloud/capmonster-rust-captcha-solver"
 homepage = "https://capmonster.cloud"
 documentation = "https://docs.rs/capmonstercloud-client"
-keywords = ["captcha", "capmonster", "recaptcha", "turnstile", "captcha-solver"]
+keywords = ["captcha", "captcha-solver", "capmonster", "recaptcha", "2captcha-alternative"]
 categories = ["api-bindings", "asynchronous"]
 exclude = [".github/"]
 

@@ -4,6 +4,11 @@ All notable changes to this crate are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versions follow [SemVer](https://semver.org/)
 (while the major version is 0, a breaking change bumps the **minor** number).
 
+## [0.3.1]
+
+### Changed
+- Crate description and keywords on crates.io now list the full range of supported captcha types.
+
 ## [0.3.0]
 
 ### Added
